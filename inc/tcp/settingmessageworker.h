@@ -15,13 +15,12 @@ class SettingMessageWorker: public BaseMessageWorker
 {
     Q_OBJECT
 private:
-    //规定返回空字符串表示执行成功
-    QString registerNewUser(const char *data_buf);
-    void praiseMessageStruct(TCPMessage *msg_stru);
     QTcpSocket *tcp_socket;
 public:
     SettingMessageWorker(QObject *parent);
+
     void init();
+    void startAll();
     void setTCPSocket(QTcpSocket *sock);
     void analizeMsgStru(QSharedPointer<TCPMessage> msg_stru) override;
 

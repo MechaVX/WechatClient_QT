@@ -3,10 +3,13 @@
 
 TCPSendWorker::TCPSendWorker(QObject *parent, QTcpSocket *sock): QObject(parent), tcp_sock(sock)
 {
-    base_msg_worker = new BaseMessageWorker(this);
+
 }
 
-
+void TCPSendWorker::init()
+{
+    base_msg_worker = new BaseMessageWorker(this);
+}
 
 void TCPSendWorker::sendTCPMessage(QSharedPointer<TCPMessage> msg_stru)
 {

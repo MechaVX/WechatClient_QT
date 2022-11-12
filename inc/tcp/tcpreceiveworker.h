@@ -4,6 +4,8 @@
 #include <QThread>
 #include <QTcpSocket>
 #include "settingmessageworker.h"
+#include "friendsmessageworker.h"
+#include "flushmessageworker.h"
 
 class TCPReceiveWorker: public QObject
 {
@@ -17,8 +19,12 @@ private:
     QTcpSocket *tcp_sock;
 
     SettingMessageWorker *setting_worker;
+    FriendsMessageWorker *friends_worker;
+    FlushMessageWorker *flush_worker;
 public:
     TCPReceiveWorker(QObject *parent, QTcpSocket *socket);
+    void init();
+    void startFullFunction();
 };
 
 #endif // TCPRECEIVEWORKER_H

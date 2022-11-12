@@ -1,4 +1,4 @@
-#include "inc/tcp/basemessageworker.h"
+#include "basemessageworker.h"
 
 BaseMessageWorker::BaseMessageWorker(QObject *parent): QObject(parent) {}
 

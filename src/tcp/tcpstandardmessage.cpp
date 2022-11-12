@@ -1,6 +1,7 @@
 #include "inc/tcp/tcpstandardmessage.h"
 
 #include <string.h>
+#include <QSharedPointer>
 
 namespace tcp_standard_message
 {
@@ -16,6 +17,8 @@ QSharedPointer<TCPMessage> TCPMessage::createTCPMessage(MessageType msg_typ, int
     msg_stru->msg_typ = msg_typ;
     msg_stru->msg_opt = msg_opt;
     msg_stru->data_len = size;
+    if (size == 0)
+        return msg_stru;
     msg_stru->data_buf = new char[size];
     char *ptr = msg_stru->data_buf;
     for (const std::string& str: strs)
@@ -28,6 +31,7 @@ QSharedPointer<TCPMessage> TCPMessage::createTCPMessage(MessageType msg_typ, int
         *ptr = ' ';
         ++ptr;
     }
+    --ptr;
     *ptr = '\0';
     return msg_stru;
 }
@@ -63,6 +67,19 @@ void TCPMessage::copyDataFromString(const std::string& str)
     this->data_len = str.length() + 1;
     data_buf = new char[data_len];
     strcpy(data_buf, str.data());
+}
+
+std::string TCPMessage::serializeToStdString() const
+{
+    std::string result;
+    result += std::to_string(msg_typ) + ' ';
+    result += std::to_string(msg_opt) + ' ';
+    result += std::to_string(data_len) + ' ';
+    for (uint32_t i = 0; i < data_len; ++i)
+    {
+        result.push_back(data_buf[i]);
+    }
+    return result;
 }
 
 }

@@ -16,6 +16,8 @@ enum MessageType
     setting,
     friends,
     groups,
+    //指客户端主动刷新消息
+    flush,
 };
 
 enum UserSetting
@@ -33,6 +35,7 @@ enum FriendOperation
 {
     search_someone,
     add_friend,
+    agree_add_friend,
     remove_friend,
     send_message,
     send_file,
@@ -46,6 +49,7 @@ enum GroupsOperation
 {
     search_group,
     join_group,
+    agree_join_group,
     exit_group,
     create_group,
     dispersed_group,
@@ -55,6 +59,13 @@ enum GroupsOperation
     change_group_master,
     disable_group_communication,
     enable_group_communication,
+};
+
+enum FlushOperation
+{
+    flush_message,
+    flush_friends,
+    flush_group,
 };
 
 
@@ -76,7 +87,7 @@ struct TCPMessage
     //void operator=(const std::string& str);
     void copyDataFromString(const std::string& str);
     static QSharedPointer<TCPMessage> createTCPMessage(MessageType msg_typ, int msg_opt, const std::vector<std::string>& strs);
-    static bool register_meta_object;
+    std::string serializeToStdString() const;
 };
 
 

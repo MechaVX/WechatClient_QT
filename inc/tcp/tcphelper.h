@@ -25,11 +25,6 @@ private:
     //如果连接不上服务器，会尝试一直连接
     bool keep_connecting;
     bool connected_success;
-
-    void closeConnect();
-
-
-    void setComponentsConnection();
 public:
     TCPHelper(QWidget *parent);
     ~TCPHelper();
@@ -38,7 +33,10 @@ public:
     //返回的字符串中结尾数组为'\0'
     std::string serializeString(const QVector<std::string>& str_arr);
     bool commitTCPMessage(QSharedPointer<tcp_standard_message::TCPMessage> tcp_msg_stru);
+    QTcpSocket* getTCPSocket();
 
+    //主要考虑到recv_worker的完全启动需要等待其他窗口全都生成，该函数应在其他窗口new生成后再使用
+    void completelyStart();
 private slots:
     //
     void connectSuccessfully();

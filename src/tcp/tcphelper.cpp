@@ -52,7 +52,8 @@ void TCPHelper::connectSuccessfully()
     connected_success = true;
     send_worker = new TCPSendWorker(this, tcp_socket);
     recv_worker = new TCPReceiveWorker(this, tcp_socket);
-
+    send_worker->init();
+    recv_worker->init();
     //QMessageBox::information(dynamic_cast<QWidget*>(this->parent()), "连接成功", "成功连接至服务器!", QMessageBox::Ok);
 }
 
@@ -67,10 +68,20 @@ void TCPHelper::connectError()
     }
 }
 
+QTcpSocket* TCPHelper::getTCPSocket()
+{
+    return tcp_socket;
+}
+
 
 bool TCPHelper::isConnectToServer()
 {
     return connected_success;
+}
+
+void TCPHelper::completelyStart()
+{
+    recv_worker->startFullFunction();
 }
 
 
@@ -99,8 +110,6 @@ std::string TCPHelper::serializeString(const QVector<std::string>& str_arr)
 //将该结构体的成员以字符串形式发送，接收端无需考虑大小端的问题
 bool TCPHelper::commitTCPMessage(QSharedPointer<TCPMessage> tcp_msg_stru)
 {
-
-    qDebug() << "TCPHelper::commitTCPMessage";
     if (!connected_success)
         return false;
     send_worker->sendTCPMessage(tcp_msg_stru);

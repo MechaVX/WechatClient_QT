@@ -2,30 +2,22 @@
 #include "ui_loginwidget.h"
 #include "globaldefine.h"
 #include "inc/tcp/tcphelper.h"
+#include "stackedwidget.h"
 
 #include <QDebug>
 #include <QPainter>
 #include <QMessageBox>
 #include <QCloseEvent>
 
+
 using namespace tcp_standard_message;
 
 LoginWidget::LoginWidget(QWidget *parent)
-    : QWidget(parent)
+    : BaseWidget(main_widgets_managing::login_widget, parent)
     , ui(new Ui::LoginWidget)
 {
     ui->setupUi(this);
-
-
-    this->setWindowTitle("欢迎来到wechat");
-    bk_img = new QPixmap(images_sources::login_background);
-    lbl_img = new QPixmap(images_sources::login_label_img);
-    //ui->img_lbl->setPixmap(*lbl_img);
-    ui->passwd_edit->setEchoMode(QLineEdit::Password);
-
-    tcp_helper = new TCPHelper(this);
-
-    setComponentsConnection();
+    init();
 }
 
 
@@ -34,8 +26,26 @@ LoginWidget::~LoginWidget()
     delete ui;
     delete bk_img;
     delete lbl_img;
+
 }
 
+void LoginWidget::init()
+{
+    this->setWindowTitle("欢迎来到wechat");
+    bk_img = new QPixmap(images_sources::login_background);
+    lbl_img = new QPixmap(images_sources::login_label_img);
+    //ui->img_lbl->setPixmap(*lbl_img);
+    ui->passwd_edit->setEchoMode(QLineEdit::Password);
+    ui->account_edit->setText("1643616079");
+    ui->passwd_edit->setText("M4A1AK47");
+    tcp_helper = new TCPHelper(this);
+    setComponentsConnection();
+}
+
+void LoginWidget::goAheadToThisWidget()
+{
+
+}
 
 bool LoginWidget::isAccountFormatCorrect(const QString &str)
 {
@@ -148,7 +158,13 @@ void LoginWidget::userLoginSlot(bool success, QString str)
 {
     if (success)
     {
-        QMessageBox::information(this, "提示", QString("%1 登录成功!").arg(str));
+        this->user_account = ui->account_edit->text().toStdString();
+
+        //注意这里不是setparent
+        stack_wnd = new StackedWidget;
+        stack_wnd->init();
+        stack_wnd->show();
+        this->hide();
     }
     else
     {
@@ -158,8 +174,16 @@ void LoginWidget::userLoginSlot(bool success, QString str)
     }
 }
 
+TCPHelper* LoginWidget::getTCPHelper()
+{
+    return this->tcp_helper;
+}
 
+std::string LoginWidget::getAccount()
+{
+    return this->user_account;
 
+}
 
 void LoginWidget::paintEvent(QPaintEvent *event)
 {
@@ -167,19 +191,16 @@ void LoginWidget::paintEvent(QPaintEvent *event)
     painter.drawPixmap(this->rect(), *bk_img);
 }
 
-/*
+
 void LoginWidget::closeEvent(QCloseEvent *event)
 {
-
     auto ret = QMessageBox::information(this, "退出", "确定要退出Wechat?", QMessageBox::Yes, QMessageBox::No);
     if (ret != QMessageBox::Yes)
     {
-        event->accept();
+        event->ignore();
         return;
     }
-    auto msg_stru = TCPMessage::createTCPMessage(setting, user_logout, { "logout" });
-    tcp_helper->commitTCPMessage(msg_stru);
-
-    event->ignore();
+    event->accept();
 }
-*/
+
+

@@ -6,18 +6,9 @@
 
 SettingMessageWorker::SettingMessageWorker(QObject *parent): BaseMessageWorker(parent)
 {
-    this->init();
-}
-
-QString SettingMessageWorker::registerNewUser(const char *data_buf)
-{
 
 }
 
-void SettingMessageWorker::praiseMessageStruct(TCPMessage *msg_stru)
-{
-
-}
 
 void SettingMessageWorker::analizeMsgStru(QSharedPointer<TCPMessage> msg_stru)
 {
@@ -44,6 +35,11 @@ void SettingMessageWorker::init()
     }
     QObject::connect(this, &SettingMessageWorker::registerSignal, login_widget, &LoginWidget::userRegisterSlot);
     QObject::connect(this, &SettingMessageWorker::loginSignal, login_widget, &LoginWidget::userLoginSlot);
+}
+
+void SettingMessageWorker::startAll()
+{
+
 }
 
 void SettingMessageWorker::setTCPSocket(QTcpSocket *sock)
