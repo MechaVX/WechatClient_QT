@@ -15,6 +15,7 @@ class MessageWidget;
 class FriendWidget;
 class LoginWidget;
 class TCPHelper;
+class TCPMessageHelper;
 
 class StackedWidget : public QStackedWidget
 {
@@ -25,8 +26,7 @@ public:
     ~StackedWidget();
 
     void init();
-
-    TCPHelper* getTCPHelper();
+    void startAll();
     std::string getAccount();
 private:
     Ui::StackedWidget *ui;
@@ -37,6 +37,7 @@ private:
 
     MessageWidget *msg_wnd;
     FriendWidget *frd_wnd;
+    TCPMessageHelper *msg_helper;
 
     std::string account;
     void userLogout(bool exit_progress = true);

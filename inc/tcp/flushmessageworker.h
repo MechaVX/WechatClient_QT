@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "basemessageworker.h"
+#include "friendbriefinfo.h"
 
 class FlushMessageWorker : public BaseMessageWorker
 {
@@ -14,7 +15,7 @@ public:
     void startAll();
     void analizeMsgStru(QSharedPointer<TCPMessage> msg_stru) override;
 signals:
-    void updateFriends();
+    void updateFriends(FrndInfoVectPtr frnd_infos);
 
 private:
     void flushFriend(QSharedPointer<TCPMessage> msg_stru);

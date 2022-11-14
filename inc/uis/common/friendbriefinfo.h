@@ -2,6 +2,8 @@
 #define FRIENDBRIEFINFO_H
 
 #include <QString>
+#include <QVector>
+#include <QSharedPointer>
 
 struct FriendBriefInfo
 {
@@ -11,12 +13,14 @@ struct FriendBriefInfo
     QString username;
     inline operator bool() const
     {
-        return account.isEmpty();
+        return account.length() != 0;
     }
     inline bool isValid() const
     {
-        return account.isEmpty();
+        return account.length() != 0;
     }
 };
+
+typedef QSharedPointer<QVector<FriendBriefInfo> > FrndInfoVectPtr;
 
 #endif // FRIENDBRIEFINFO_H

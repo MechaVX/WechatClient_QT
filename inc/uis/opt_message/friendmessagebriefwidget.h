@@ -24,6 +24,11 @@ public:
 
     void flushMessageDisplay(const communication_message::Message& msg_stru);
 
+protected:
+    //返回true表示事件处理完毕，不会再传播
+    bool event(QEvent *ev) override;
+
+    void mousePressEvent(QMouseEvent *event) override;
 private:
 
 

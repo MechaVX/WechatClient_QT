@@ -11,6 +11,7 @@
 using tcp_standard_message::TCPMessage;
 using std::string;
 
+class TCPMessageHelper;
 
 //该类的子类用于处理同的消息类型(tcp_standard_message::MessageType)
 class BaseMessageWorker: public QObject
@@ -19,7 +20,7 @@ class BaseMessageWorker: public QObject
 public:
     BaseMessageWorker(QObject *parent);
     string serializeMsgStruToString(const TCPMessage& msg_stru) const;
-    void praiseDataToMsgStru(TCPMessage *tcp_msg_stru, const char *recv_data);
+
     virtual void analizeMsgStru(QSharedPointer<TCPMessage> msg_stru);
 protected:
     //该函数用于按照空格分割字符串，data_buf中间不能包含'\0'
@@ -33,6 +34,8 @@ protected:
     //这样设计是为了确保Widget构造出来后才进行正确的connect
     //virtual void init() = 0;
     //virtual void startAll() = 0;
+    TCPMessageHelper *msg_helper;
+
 };
 
 #endif // BASEMESSAGEWORKER_H

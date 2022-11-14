@@ -82,8 +82,7 @@ struct TCPMessage
     ~TCPMessage();
     TCPMessage(TCPMessage&& msg_stru);
     TCPMessage(const TCPMessage&) = delete;
-
-    TCPMessage& operator=(const TCPMessage& msg_stru) = delete;
+    TCPMessage& operator=(const TCPMessage& other) = delete;
     //void operator=(const std::string& str);
     void copyDataFromString(const std::string& str);
     static QSharedPointer<TCPMessage> createTCPMessage(MessageType msg_typ, int msg_opt, const std::vector<std::string>& strs);
@@ -94,5 +93,7 @@ struct TCPMessage
 
 } // namespace tcp_standard_message
 
+typedef QSharedPointer<tcp_standard_message::TCPMessage> TCPMsgStruPtr;
 
+//Q_DECLARE_METATYPE(tcp_standard_message::TCPMessage);
 #endif // TCPSTANDARDMESSAGE_H

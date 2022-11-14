@@ -1,7 +1,7 @@
 #include "loginwidget.h"
 #include "ui_loginwidget.h"
 #include "globaldefine.h"
-#include "inc/tcp/tcphelper.h"
+#include "tcphelper.h"
 #include "stackedwidget.h"
 
 #include <QDebug>
@@ -23,6 +23,7 @@ LoginWidget::LoginWidget(QWidget *parent)
 
 LoginWidget::~LoginWidget()
 {
+    this->prepareToExitProgess();
     delete ui;
     delete bk_img;
     delete lbl_img;
@@ -34,12 +35,21 @@ void LoginWidget::init()
     this->setWindowTitle("欢迎来到wechat");
     bk_img = new QPixmap(images_sources::login_background);
     lbl_img = new QPixmap(images_sources::login_label_img);
-    //ui->img_lbl->setPixmap(*lbl_img);
+
     ui->passwd_edit->setEchoMode(QLineEdit::Password);
     ui->account_edit->setText("1643616079");
     ui->passwd_edit->setText("M4A1AK47");
-    tcp_helper = new TCPHelper(this);
     setComponentsConnection();
+
+    tcp_helper = new TCPHelper;
+    tcp_thread = new QThread;
+    tcp_helper->moveToThread(tcp_thread);
+    tcp_thread->start();
+    //需要使用信号
+    //tcp_helper->init();
+    QObject::connect(this, &LoginWidget::initTCPHelperSignal, tcp_helper, &TCPHelper::init);
+    emit initTCPHelperSignal();
+    this->msg_helper = new TCPMessageHelper(this, tcp_helper);
 }
 
 void LoginWidget::goAheadToThisWidget()
@@ -103,14 +113,24 @@ void LoginWidget::setComponentsConnection()
         //防止用户多次按下
         ui->login_button->setDisabled(true);
         ui->register_button->setDisabled(true);
-        qDebug() << "LoginWidget::setComponentsConnection";
         QSharedPointer<TCPMessage> msg_stru = TCPMessage::createTCPMessage(setting, user_login, { qaccount.toStdString(), qpasswd.toStdString() });
-        if (!tcp_helper->commitTCPMessage(msg_stru))
+        if (!msg_helper->commitTCPMessage(msg_stru))
         {
             QMessageBox::critical(this, "连接错误", "无法连接至服务器，请检查网络后重试!");
             ui->login_button->setDisabled(false);
             ui->register_button->setDisabled(false);
         }
+        /*
+         * 测试粘包时用
+        string tmp("abcdefghsssssssss23sfsfsfsfsofshfosfhsfoisssijklmnop");
+        qDebug() << tmp.length();
+        for (int i = 0; i < 15; ++i)
+        {
+            QSharedPointer<TCPMessage> msg_stru = TCPMessage::createTCPMessage(invalid, 1, { tmp, tmp, tmp, tmp });
+            msg_helper->commitTCPMessage(msg_stru);
+        }
+
+        */
     });
 
     QObject::connect(ui->register_button, &QPushButton::clicked, [this]()
@@ -130,8 +150,7 @@ void LoginWidget::setComponentsConnection()
         ui->login_button->setDisabled(true);
         ui->register_button->setDisabled(true);
         QSharedPointer<TCPMessage> msg_stru = TCPMessage::createTCPMessage(setting, user_register, { qphone.toStdString(), qpasswd.toStdString() });
-        qDebug() << "LoginWidget::setComponentsConnection";
-        if (!tcp_helper->commitTCPMessage(msg_stru))
+        if (!msg_helper->commitTCPMessage(msg_stru))
         {
             QMessageBox::critical(this, "连接错误", "无法连接至服务器，请检查网络后重试!");
             ui->login_button->setDisabled(false);
@@ -163,6 +182,11 @@ void LoginWidget::userLoginSlot(bool success, QString str)
         //注意这里不是setparent
         stack_wnd = new StackedWidget;
         stack_wnd->init();
+        //tcp_helper->completelyStart();
+        QObject::connect(this, &LoginWidget::startAllTCPHelperSignal, tcp_helper, &TCPHelper::completelyStart,
+                         (Qt::ConnectionType)(Qt::AutoConnection | Qt::UniqueConnection));
+        emit startAllTCPHelperSignal();
+        stack_wnd->startAll();
         stack_wnd->show();
         this->hide();
     }
@@ -192,6 +216,7 @@ void LoginWidget::paintEvent(QPaintEvent *event)
 }
 
 
+
 void LoginWidget::closeEvent(QCloseEvent *event)
 {
     auto ret = QMessageBox::information(this, "退出", "确定要退出Wechat?", QMessageBox::Yes, QMessageBox::No);
@@ -203,4 +228,14 @@ void LoginWidget::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
+void LoginWidget::prepareToExitProgess()
+{
+    QObject::connect(this, &LoginWidget::exitSignal, tcp_helper, &TCPHelper::prepareToExit);
+    emit exitSignal();
+    QThread::msleep(200);
+    tcp_thread->quit();
+    tcp_thread->exit();
+    tcp_thread->deleteLater();
+    tcp_helper->deleteLater();
+}
 

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPixmap>
+#include <QThread>
 #include <string>
 #include "basewidget.h"
 
@@ -25,6 +26,8 @@ private:
     Ui::LoginWidget *ui;
     QPixmap *bk_img;
     QPixmap *lbl_img;
+    //tcp工作的线程
+    QThread *tcp_thread;
     TCPHelper *tcp_helper;
     //用于保存当前登录用户的账号
     std::string user_account;
@@ -49,13 +52,14 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 signals:
+    void initTCPHelperSignal();
+    void startAllTCPHelperSignal();
+    void exitSignal();
 public slots:
     void userRegisterSlot(bool success, QString msg);
     void userLoginSlot(bool success, QString msg);
-public:
-
 private:
-
+    void prepareToExitProgess();
 
 };
 #endif // LOGINWIDGET_H

@@ -1,4 +1,5 @@
 #include "friendsmessageworker.h"
+#include "loginwidget.h"
 #include "stackedwidget.h"
 #include "frienddetailwidget.h"
 #include "newfriendwidget.h"
@@ -20,6 +21,8 @@ void FriendsMessageWorker::init()
 
 void FriendsMessageWorker::startAll()
 {
+    msg_helper = new TCPMessageHelper(this, dynamic_cast<LoginWidget*>(getWidgetPointer(login_widget))->getTCPHelper());
+
     FriendDetailWidget *frnd_det_wnd = dynamic_cast<FriendDetailWidget*>(getWidgetPointer(friend_detail_widget));
 
     void (FriendDetailWidget::*fun)(const QString&, const QString&, const QString&, const QString&, bool) = &FriendDetailWidget::showUserInformation;
@@ -55,7 +58,6 @@ void FriendsMessageWorker::analizeMsgStru(QSharedPointer<TCPMessage> msg_stru)
         if (msg_stru->data_buf[0] != 'f')
         {
             //data_buf!="fail. account no found!"
-
             emit userInfoFound(result[0], result[1], QString(), QString(), false);
         }
         else
@@ -66,7 +68,7 @@ void FriendsMessageWorker::analizeMsgStru(QSharedPointer<TCPMessage> msg_stru)
     }
     else if (opt == tcp_standard_message::add_friend)
     {
-
+        qDebug() << msg_stru->data_buf;
         //result[0]为本人账户(如果正确)，result[1]为申请人账户，其余为申请信息留言
         auto result = this->splitDataBySpace(msg_stru->data_buf);
         if (result.size() < 2)
@@ -93,10 +95,10 @@ void FriendsMessageWorker::analizeMsgStru(QSharedPointer<TCPMessage> msg_stru)
     {
         qDebug() << "agree add friend" << msg_stru->data_buf;
         StackedWidget *stack_wnd = dynamic_cast<StackedWidget*>(getWidgetPointer(stack_widget));
-        TCPHelper *tcp_helper = stack_wnd->getTCPHelper();
         //重新刷新好友列表
         msg_stru = TCPMessage::createTCPMessage(tcp_standard_message::flush, flush_friends, { stack_wnd->getAccount() } );
-        tcp_helper->commitTCPMessage(msg_stru);
+        msg_helper->commitTCPMessage(msg_stru);
+
     }
     else if (opt == tcp_standard_message::send_message)
     {

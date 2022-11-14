@@ -5,6 +5,7 @@
 #include "friendwidget.h"
 #include "frienddetailwidget.h"
 #include "newfriendoptionwidget.h"
+#include "loginwidget.h"
 #include "tcphelper.h"
 
 #include <QIcon>
@@ -29,6 +30,7 @@ NewFriendWidget::~NewFriendWidget()
 
 void NewFriendWidget::init()
 {
+    msg_helper = new TCPMessageHelper(this, dynamic_cast<LoginWidget*>(getWidgetPointer(login_widget))->getTCPHelper());
 
     ui->search_button->setIcon(QIcon(uis_search));
     ui->search_button->setFlat(true);
@@ -80,10 +82,9 @@ void NewFriendWidget::searchUser()
         frnd_det_wnd->showUserInformation(frnd_info);
         return;
     }
-    TCPHelper *tcp_helper = stack_wnd->getTCPHelper();
     auto msg_stru = TCPMessage::createTCPMessage(friends, search_someone, {str.toStdString()});
-    qDebug() << msg_stru->data_buf;
-    tcp_helper->commitTCPMessage(msg_stru);
+    msg_helper->commitTCPMessage(msg_stru);
+
 }
 
 void NewFriendWidget::notSuchUser(const QString& account)

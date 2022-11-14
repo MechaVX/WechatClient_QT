@@ -1,5 +1,6 @@
-#include "inc/tcp/settingmessageworker.h"
+#include "settingmessageworker.h"
 #include "loginwidget.h"
+#include "globaldefine.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -27,7 +28,8 @@ void SettingMessageWorker::analizeMsgStru(QSharedPointer<TCPMessage> msg_stru)
 
 void SettingMessageWorker::init()
 {
-    LoginWidget *login_widget = dynamic_cast<LoginWidget*>(this->parent()->parent()->parent());
+    using namespace main_widgets_managing;
+    LoginWidget *login_widget = dynamic_cast<LoginWidget*>(getWidgetPointer(main_widgets_managing::login_widget));
     if (login_widget == nullptr)
     {
         qDebug() << "SettingMessageWorker::SettingMessageWorker dynamic_cast error";

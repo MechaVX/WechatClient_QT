@@ -43,7 +43,24 @@ TCPMessage::~TCPMessage()
     if (data_buf != nullptr)
         delete data_buf;
 }
-
+/*
+TCPMessage::TCPMessage(const TCPMessage& other)
+{
+    this->data_len = other.data_len;
+    this->msg_typ = other.msg_typ;
+    this->msg_opt = other.msg_opt;
+    if (other.data_buf != nullptr)
+    {
+        this->data_buf = new char[data_len];
+        for (uint32_t i = 0; i < data_len; ++i)
+            data_buf[i] = other.data_buf[i];
+    }
+    else
+    {
+        this->data_buf = nullptr;
+    }
+}
+*/
 TCPMessage::TCPMessage(TCPMessage&& msg_stru)
 {
     this->data_len = msg_stru.data_len;
@@ -53,7 +70,27 @@ TCPMessage::TCPMessage(TCPMessage&& msg_stru)
     msg_stru.msg_opt = -1;
     msg_stru.data_buf = nullptr;
 }
-
+/*
+TCPMessage& TCPMessage::operator=(const TCPMessage& other)
+{
+    this->data_len = other.data_len;
+    this->msg_typ = other.msg_typ;
+    this->msg_opt = other.msg_opt;
+    if (this->data_buf != nullptr)
+        delete data_buf;
+    if (other.data_buf != nullptr)
+    {
+        this->data_buf = new char[data_len];
+        for (uint32_t i = 0; i < data_len; ++i)
+            data_buf[i] = other.data_buf[i];
+    }
+    else
+    {
+        this->data_buf = nullptr;
+    }
+    return *this;
+}
+*/
 void TCPMessage::copyDataFromString(const std::string& str)
 {
     if (data_buf != nullptr)

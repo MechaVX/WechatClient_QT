@@ -4,6 +4,7 @@
 #include "stackedwidget.h"
 #include "newfriendwidget.h"
 #include "tcpstandardmessage.h"
+#include "loginwidget.h"
 #include "tcphelper.h"
 
 #include <QDebug>
@@ -29,6 +30,9 @@ NewFriendOptionWidget::~NewFriendOptionWidget()
 
 void NewFriendOptionWidget::init(const QString &account, const QString &user_name, const QString &message)
 {
+
+    msg_helper = new TCPMessageHelper(this, dynamic_cast<LoginWidget*>(getWidgetPointer(login_widget))->getTCPHelper());
+
     this->account = account;
     this->nickname = user_name;
     this->message = message;
@@ -38,13 +42,12 @@ void NewFriendOptionWidget::init(const QString &account, const QString &user_nam
     QObject::connect(ui->accept_button, &QPushButton::clicked, [=]()
     {
         StackedWidget *stack_wnd = dynamic_cast<StackedWidget*>(getWidgetPointer(stack_widget));
-        TCPHelper *tcp_helper = stack_wnd->getTCPHelper();
 
         auto msg_stru = TCPMessage::createTCPMessage(friends, agree_add_friend, { stack_wnd->getAccount(), account.toStdString()});
-        tcp_helper->commitTCPMessage(msg_stru);
+        msg_helper->commitTCPMessage(msg_stru);
         //重新刷新好友列表
         msg_stru = TCPMessage::createTCPMessage(tcp_standard_message::flush, flush_friends, { stack_wnd->getAccount() } );
-        tcp_helper->commitTCPMessage(msg_stru);
+        msg_helper->commitTCPMessage(msg_stru);
 
         //
         NewFriendWidget *frnd_wnd = dynamic_cast<NewFriendWidget*>(getWidgetPointer(new_friend_widget));

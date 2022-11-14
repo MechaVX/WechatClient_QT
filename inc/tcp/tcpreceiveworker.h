@@ -21,6 +21,11 @@ private:
     SettingMessageWorker *setting_worker;
     FriendsMessageWorker *friends_worker;
     FlushMessageWorker *flush_worker;
+
+    QList<TCPMsgStruPtr> praiseDataToMsgStru(const char *recv_data, int data_len);
+
+    //为了解决TCP粘包的问题，如果判断某个socket的消息未发送完毕，先将消息使用储存至此
+    QVector<char> incomplete_data;
 public:
     TCPReceiveWorker(QObject *parent, QTcpSocket *socket);
     void init();

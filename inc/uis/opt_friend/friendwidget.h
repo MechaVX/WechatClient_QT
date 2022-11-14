@@ -11,6 +11,7 @@
 #include "basewidget.h"
 #include "friendbriefinfo.h"
 
+
 namespace Ui {
 class FriendWidget;
 }
@@ -60,9 +61,9 @@ private:
     QHash<QString, FriendBriefInfo> account_frndinfo_map;
 public slots:
     void newFriendRequireCome();
-    void updateFriendsList();
+    void updateFriendsList(FrndInfoVectPtr frnd_info);
 public:
-    void storeFriendsInformation(QVector<FriendBriefInfo>& frnd_infos);
+    //void storeFriendsInformation(QVector<FriendBriefInfo>& frnd_infos);
     //如果account不在好友列表里，返回无效的FriendBriefInfo
     //这两个函数不考虑自己账号
     FriendBriefInfo getFriendBriefInfo(const QString& account);

@@ -44,19 +44,23 @@ void StackedWidget::init()
     //务必先add后init
     this->addWidget(msg_wnd);
     this->addWidget(frd_wnd);
-    this->wids_stack.push(msg_wnd);
     msg_wnd->init();
     frd_wnd->init();
-    //其他窗口已全部init，可完全启动TCPHelper
-    TCPHelper *tcp_helper = getTCPHelper();
-    tcp_helper->completelyStart();
 
+    this->wids_stack.push(msg_wnd);
+
+}
+
+void StackedWidget::startAll()
+{
+    this->msg_helper = new TCPMessageHelper(this, login_widget->getTCPHelper());
     //获取新消息
     auto msg_stru = TCPMessage::createTCPMessage(tcp_standard_message::flush, flush_message, { account });
-    tcp_helper->commitTCPMessage(msg_stru);
+    msg_helper->commitTCPMessage(msg_stru);
     //获取朋友列表
     msg_stru = TCPMessage::createTCPMessage(tcp_standard_message::flush, flush_friends, { account });
-    tcp_helper->commitTCPMessage(msg_stru);
+    msg_helper->commitTCPMessage(msg_stru);
+
 }
 
 
@@ -83,7 +87,7 @@ void StackedWidget::userLogout(bool exit_progress)
     QTimer *timer = new QTimer(this);
     timer->start(500);
     auto msg_stru = TCPMessage::createTCPMessage(setting, user_logout, { account });
-    login_widget->getTCPHelper()->commitTCPMessage(msg_stru);
+    msg_helper->commitTCPMessage(msg_stru);
     QObject::connect(timer, &QTimer::timeout, [=]()
     {
         timer->stop();
@@ -113,11 +117,6 @@ void StackedWidget::switchWidget(BaseWidget *wnd)
     this->setCurrentWidget(wids_stack.top());
 }
 
-
-TCPHelper* StackedWidget::getTCPHelper()
-{
-    return this->login_widget->getTCPHelper();
-}
 
 std::string StackedWidget::getAccount()
 {

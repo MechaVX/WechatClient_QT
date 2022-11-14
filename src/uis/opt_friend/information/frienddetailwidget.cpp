@@ -2,6 +2,7 @@
 #include "friendwidget.h"
 #include "globaldefine.h"
 #include "stackedwidget.h"
+#include "loginwidget.h"
 #include "friendoperatorlabel.h"
 #include "tcpstandardmessage.h"
 #include "messagewidget.h"
@@ -41,13 +42,15 @@ void FriendDetailWidget::init()
         stack_wnd->switchWidget(nullptr);
     });
 
+    msg_helper = new TCPMessageHelper(this, dynamic_cast<LoginWidget*>(getWidgetPointer(login_widget))->getTCPHelper());
+
     QObject::connect(ui->modify_frnd_lbl, &FriendOperatorLabel::friendOperation, this, &FriendDetailWidget::executeOperationToUser);
     QObject::connect(ui->talk_lbl, &FriendOperatorLabel::friendOperation, this, &FriendDetailWidget::executeOperationToUser);
 }
 
 void FriendDetailWidget::showUserInformation(const FriendBriefInfo& frnd_info)
 {
-    showUserInformation(frnd_info.account, frnd_info.username, frnd_info.nickname, frnd_info.label, frnd_info.label.isEmpty());
+    showUserInformation(frnd_info.account, frnd_info.username, frnd_info.nickname, frnd_info.label, !frnd_info.label.isEmpty());
 }
 
 void FriendDetailWidget::showUserInformation(const QString& account,
@@ -122,10 +125,9 @@ void FriendDetailWidget::executeOperationToUser(QLabel *lbl)
             return;
 
 
-        TCPHelper *tcp_helper = stack_wnd->getTCPHelper();
         std::vector<std::string> apply_msg{ frnd_account, stack_wnd->getAccount(), apply_dialog.getLineText().toStdString()};
         auto msg_stru = TCPMessage::createTCPMessage(friends, add_friend, apply_msg);
-        tcp_helper->commitTCPMessage(msg_stru);
+        msg_helper->commitTCPMessage(msg_stru);
     }
 
     else if (str == "发送消息")

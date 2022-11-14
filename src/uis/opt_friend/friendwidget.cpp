@@ -99,19 +99,12 @@ void FriendWidget::newFriendRequireCome()
     new_brief_wid->newFriendApplyCome();
 }
 
-void FriendWidget::storeFriendsInformation(QVector<FriendBriefInfo>& frnd_infos)
+void FriendWidget::updateFriendsList(FrndInfoVectPtr frnd_infos)
 {
-    account_frndinfo_map_mutex.lock();
-    //所有的好友都是一次性刷新全部的，不提供单独刷新增删某个的函数方法
-    for (auto& frnd_info: frnd_infos)
+    for (auto it = frnd_infos->begin(); it != frnd_infos->end(); ++it)
     {
-        account_frndinfo_map.insert(frnd_info.account, frnd_info);
+        account_frndinfo_map.insert(it->account, *it);
     }
-    account_frndinfo_map_mutex.unlock();
-}
-
-void FriendWidget::updateFriendsList()
-{
     QListWidget *list_wnd =  ui->listWidget;
     //先把所有的除newfriendbriefwidget外的移除，再获取新的
     for (int count = list_wnd->count() - 1; count > 0; --count)

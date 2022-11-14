@@ -8,6 +8,8 @@ namespace Ui {
 class NewFriendOptionWidget;
 }
 
+class TCPMessageHelper;
+
 class NewFriendOptionWidget : public QWidget
 {
     Q_OBJECT
@@ -25,6 +27,8 @@ private:
     QString account;
     QString nickname;
     QString message;
+
+    TCPMessageHelper *msg_helper;
 };
 
 #endif // NEWFRIENDOPTIONWIDGET_H
