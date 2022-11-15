@@ -63,6 +63,8 @@ public slots:
     void newFriendRequireCome();
     void updateFriendsList(FrndInfoVectPtr frnd_info);
 public:
+    //用于new_brief_wid回复图标
+    void allFriendsApplySlove();
     //void storeFriendsInformation(QVector<FriendBriefInfo>& frnd_infos);
     //如果account不在好友列表里，返回无效的FriendBriefInfo
     //这两个函数不考虑自己账号

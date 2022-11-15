@@ -24,6 +24,8 @@ public:
     void goAheadToThisWidget() override;
 
     void removeFriendApply(const QString& account);
+    //好友申请列表有多少个
+    quint32 getApplyAmount();
 private:
     Ui::NewFriendWidget *ui;
 

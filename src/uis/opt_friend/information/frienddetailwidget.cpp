@@ -114,7 +114,7 @@ void FriendDetailWidget::executeOperationToUser(QLabel *lbl)
 
     QString tmp = ui->account_lbl->text();
     //移除"账户 "字符，剩下账号
-    std::string frnd_account = tmp.remove(0, tmp.indexOf(' ') + 1).toStdString();
+    QString frnd_account = tmp.remove(0, tmp.indexOf(' ') + 1);
 
     if (str == "添加该用户")
     {
@@ -125,9 +125,12 @@ void FriendDetailWidget::executeOperationToUser(QLabel *lbl)
             return;
 
 
-        std::vector<std::string> apply_msg{ frnd_account, stack_wnd->getAccount(), apply_dialog.getLineText().toStdString()};
-        auto msg_stru = TCPMessage::createTCPMessage(friends, add_friend, apply_msg);
-        msg_helper->commitTCPMessage(msg_stru);
+        std::vector<std::string> apply_msg{ apply_dialog.getLineText().toStdString() };
+        auto msg_stru = TCPMessage::createTCPMessage(friends, add_friend, stack_wnd->getAccount(), frnd_account, apply_msg);
+        if (msg_helper->commitTCPMessage(msg_stru))
+        {
+            QMessageBox::information(this, "申请成", "已提交申请，请待对方认证！");
+        }
     }
 
     else if (str == "发送消息")
@@ -137,7 +140,7 @@ void FriendDetailWidget::executeOperationToUser(QLabel *lbl)
         communication_message::Message msg_stru;
         msg_stru.time = QTime::currentTime();
         qDebug() << msg_stru.time;
-        msg_stru.sender = frnd_account.data();
+        msg_stru.sender = frnd_account;
         msg_stru.target_type = communication_message::someone;
         msg_stru.cont_type = communication_message::text;
         msg_wid->newMessageCome(std::move(msg_stru), &frnd_info);

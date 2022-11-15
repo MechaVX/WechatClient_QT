@@ -20,7 +20,7 @@ public:
     ~NewFriendBriefWidget();
 
     //更新显示图标
-    void newFriendApplyCome();
+    void flushNewFriendIcon(bool has_new_friend);
 private:
     Ui::NewFriendBriefWidget *ui;
 

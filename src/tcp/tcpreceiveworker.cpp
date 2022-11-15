@@ -67,89 +67,96 @@ QList<TCPMsgStruPtr> TCPReceiveWorker::praiseDataToMsgStru(const char *recv_data
     {
         datas.push_back(recv_data[i]);
     }
+    //timestamp,msg_typ,msg_opt,sender,receiver,data_len
 
-    string str_data;
-    char c;
     while (!datas.empty())
     {
-        while (!datas.empty())
+        string strs[6];
+        char c;
+        int index = 0;
+        //如果接收到的数据不完整，返回false
+        auto analizeDatas = [&]()
         {
-            c = datas.front();
-            datas.pop_front();
-            if (c == ' ')
-                break;
-            str_data.push_back(c);
-        }
-        //说明数据接收不全，则放置incomplete_data中，等待下次与新数据合并处理
-        if (datas.empty())
-        {
-            for (char c: str_data)
-                incomplete_data.push_back(c);
-            return std::move(result);
-        }
-        TCPMsgStruPtr tcp_msg_stru(new TCPMessage);
-        tcp_msg_stru->msg_typ = (tcp_standard_message::MessageType)stoi(str_data);
-        str_data.clear();
-
-        while (!datas.empty())
-        {
-            c = datas.front();
-            datas.pop_front();
-            if (c == ' ')
-                break;
-            str_data.push_back(c);
-        }
-        //说明数据接收不全，则放置incomplete_data中，等待下次与新数据合并处理
-        if (datas.empty())
-        {
-            str_data = std::to_string(tcp_msg_stru->msg_typ) + ' ' + str_data;
-            for (char c: str_data)
-                incomplete_data.push_back(c);
-            return std::move(result);
-        }
-
-        tcp_msg_stru->msg_opt = (tcp_standard_message::MessageType)stoi(str_data);
-        str_data.clear();
-
-        while (!datas.empty())
-        {
-            c = datas.front();
-            datas.pop_front();
-            if (c == ' ')
-                break;
-            str_data.push_back(c);
-        }
-        //说明数据接收不全，则放置incomplete_data中，等待下次与新数据合并处理
-        if (datas.empty() && str_data != "0" /* 考虑数据长度为0的情况，此时应是接收完毕*/)
-        {
-            str_data = std::to_string(tcp_msg_stru->msg_typ) + ' ' + std::to_string(tcp_msg_stru->msg_opt) + ' ' + str_data;
-            for (char c: str_data)
-                incomplete_data.push_back(c);
-            return std::move(result);
-        }
-
-        tcp_msg_stru->data_len = (tcp_standard_message::MessageType)stoi(str_data);
-        str_data.clear();
-
-        uint32_t size = datas.size();
-        if (size < tcp_msg_stru->data_len)
-        {
-            //接收不全
-            string tmp = std::to_string(tcp_msg_stru->msg_typ) + ' ' + std::to_string(tcp_msg_stru->msg_opt) + ' ';
-            tmp += std::to_string(tcp_msg_stru->data_len) + ' ';
             while (!datas.empty())
             {
-                tmp.push_back(datas.front());
+                c = datas.front();
+                datas.pop_front();
+                if (c == ' ')
+                    break;
+                strs[index].push_back(c);
+            }
+            if (c != ' ')
+            {
+                //说明数据接收不全，则放置incomplete_data中，等待下次与新数据合并处理
+                for (int i = 0; i < index; ++i)
+                {
+                    for (char c: strs[i])
+                        incomplete_data.push_back(c);
+                    incomplete_data.push_back(' ');
+                }
+                for (char c: strs[index])
+                    incomplete_data.push_back(c);
+                return false;
+            }
+            return true;
+        };
+
+        TCPMsgStruPtr tcp_msg_stru(new TCPMessage);
+
+        if (!analizeDatas())
+            return std::move(result);
+        tcp_msg_stru->timestamp = (tcp_standard_message::MessageType)stoi(strs[index]);
+        ++index;
+
+        if (!analizeDatas())
+            return std::move(result);
+        tcp_msg_stru->msg_typ = (tcp_standard_message::MessageType)stoi(strs[index]);
+        ++index;
+
+        if (!analizeDatas())
+            return std::move(result);
+        tcp_msg_stru->msg_opt = stoi(strs[index]);
+        ++index;
+
+        if (!analizeDatas())
+            return std::move(result);
+        for (int i = 0; i < ACCOUNT_LEN; ++i)
+            tcp_msg_stru->sender[i] = strs[index][i];
+        ++index;
+
+        if (!analizeDatas())
+            return std::move(result);
+        for (int i = 0; i < ACCOUNT_LEN; ++i)
+            tcp_msg_stru->receiver[i] = strs[index][i];
+        ++index;
+
+        if (!analizeDatas())
+            return std::move(result);
+        tcp_msg_stru->data_len = stoi(strs[index]);
+
+
+        //说明数据接收不全，则放置incomplete_data中，等待下次与新数据合并处理
+        if (datas.size() < tcp_msg_stru->data_len)
+        {
+            for (string& str: strs)
+            {
+                for (char c: str)
+                {
+                    incomplete_data.push_back(c);
+                }
+                incomplete_data.push_back(' ');
+            }
+            while (!datas.empty())
+            {
+                incomplete_data.push_back(datas.front());
                 datas.pop_front();
             }
-            for (char c: str_data)
-                incomplete_data.push_back(c);
             return std::move(result);
         }
         if (tcp_msg_stru->data_len > 0)
         {
             tcp_msg_stru->data_buf = new char[tcp_msg_stru->data_len];
-            for (uint32_t i = 0; i < tcp_msg_stru->data_len; ++i)
+            for (quint32 i = 0; i < tcp_msg_stru->data_len; ++i)
             {
                 tcp_msg_stru->data_buf[i] = datas.front();
                 datas.pop_front();

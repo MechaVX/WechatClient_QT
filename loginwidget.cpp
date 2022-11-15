@@ -36,8 +36,14 @@ void LoginWidget::init()
     bk_img = new QPixmap(images_sources::login_background);
     lbl_img = new QPixmap(images_sources::login_label_img);
 
+    //只能输入数字
+    ui->account_edit->setValidator(new QRegExpValidator(QRegExp("[0-9]+$")));
+    //限定输入长度
+    ui->account_edit->setMaxLength(11);
+    ui->passwd_edit->setMaxLength(18);
+
     ui->passwd_edit->setEchoMode(QLineEdit::Password);
-    ui->account_edit->setText("1643616079");
+    ui->account_edit->setText("16436160790");
     ui->passwd_edit->setText("M4A1AK47");
     setComponentsConnection();
 
@@ -56,7 +62,7 @@ void LoginWidget::goAheadToThisWidget()
 {
 
 }
-
+/*
 bool LoginWidget::isAccountFormatCorrect(const QString &str)
 {
     if (str.length() != 10)
@@ -93,27 +99,17 @@ bool LoginWidget::isPhoneFormatCorrect(const QString &str)
     }
     return true;
 }
-
+*/
 void LoginWidget::setComponentsConnection()
 {
     QObject::connect(ui->login_button, &QPushButton::clicked, [this]()
     {
         QString qaccount = ui->account_edit->text();
-        if (!isAccountFormatCorrect(qaccount))
-        {
-            QMessageBox::information(this, "提示", "账号格式不正确，应为10位数字！");
-            return;
-        }
         QString qpasswd = ui->passwd_edit->text();
-        if (!isPasswordFormatCorrect(qpasswd))
-        {
-            QMessageBox::information(this, "提示", "密码格式不正确，长度应为6~15位数字和字母组合！");
-            return;
-        }
         //防止用户多次按下
         ui->login_button->setDisabled(true);
         ui->register_button->setDisabled(true);
-        QSharedPointer<TCPMessage> msg_stru = TCPMessage::createTCPMessage(setting, user_login, { qaccount.toStdString(), qpasswd.toStdString() });
+        QSharedPointer<TCPMessage> msg_stru = TCPMessage::createTCPMessage(setting, user_login, qaccount, TCPMessage::server_account ,{ qpasswd.toStdString() });
         if (!msg_helper->commitTCPMessage(msg_stru))
         {
             QMessageBox::critical(this, "连接错误", "无法连接至服务器，请检查网络后重试!");
@@ -126,7 +122,7 @@ void LoginWidget::setComponentsConnection()
         qDebug() << tmp.length();
         for (int i = 0; i < 15; ++i)
         {
-            QSharedPointer<TCPMessage> msg_stru = TCPMessage::createTCPMessage(invalid, 1, { tmp, tmp, tmp, tmp });
+            QSharedPointer<TCPMessage> msg_stru = TCPMessage::createTCPMessage(invalid, 1, { tmp, tmp, tmp, tmp }, qaccount);
             msg_helper->commitTCPMessage(msg_stru);
         }
 
@@ -136,20 +132,10 @@ void LoginWidget::setComponentsConnection()
     QObject::connect(ui->register_button, &QPushButton::clicked, [this]()
     {
         QString qphone = ui->account_edit->text();
-        if (!isPhoneFormatCorrect(qphone))
-        {
-            QMessageBox::information(this, "提示", "手机号码格式不正确，应为11位数字！");
-            return;
-        }
         QString qpasswd = ui->passwd_edit->text();
-        if (!isPasswordFormatCorrect(qpasswd))
-        {
-            QMessageBox::information(this, "提示", "密码格式不正确，长度应为6~15位数字和字母组合！");
-            return;
-        }
         ui->login_button->setDisabled(true);
         ui->register_button->setDisabled(true);
-        QSharedPointer<TCPMessage> msg_stru = TCPMessage::createTCPMessage(setting, user_register, { qphone.toStdString(), qpasswd.toStdString() });
+        QSharedPointer<TCPMessage> msg_stru = TCPMessage::createTCPMessage(setting, user_register, qphone, TCPMessage::server_account, { qpasswd.toStdString() });
         if (!msg_helper->commitTCPMessage(msg_stru))
         {
             QMessageBox::critical(this, "连接错误", "无法连接至服务器，请检查网络后重试!");
@@ -177,12 +163,11 @@ void LoginWidget::userLoginSlot(bool success, QString str)
 {
     if (success)
     {
-        this->user_account = ui->account_edit->text().toStdString();
+        this->user_account = ui->account_edit->text();
 
-        //注意这里不是setparent
         stack_wnd = new StackedWidget;
         stack_wnd->init();
-        //tcp_helper->completelyStart();
+
         QObject::connect(this, &LoginWidget::startAllTCPHelperSignal, tcp_helper, &TCPHelper::completelyStart,
                          (Qt::ConnectionType)(Qt::AutoConnection | Qt::UniqueConnection));
         emit startAllTCPHelperSignal();
@@ -203,7 +188,7 @@ TCPHelper* LoginWidget::getTCPHelper()
     return this->tcp_helper;
 }
 
-std::string LoginWidget::getAccount()
+QString LoginWidget::getAccount()
 {
     return this->user_account;
 

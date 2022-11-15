@@ -18,8 +18,9 @@ public:
     explicit NewFriendOptionWidget(QWidget *parent = nullptr);
     ~NewFriendOptionWidget();
 
-    void init(const QString& account, const QString& user_name, const QString& message);
-
+    void init(const QString& frnd_account, const QString& user_name, const QString& message);
+    //相同账号的申请还未被处理再次收到该账号的申请
+    void flushApplyMessage(const QString& message);
 private:
     Ui::NewFriendOptionWidget *ui;
 

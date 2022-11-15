@@ -96,7 +96,12 @@ void FriendWidget::goAheadToThisWidget()
 
 void FriendWidget::newFriendRequireCome()
 {
-    new_brief_wid->newFriendApplyCome();
+    new_brief_wid->flushNewFriendIcon(true);
+}
+
+void FriendWidget::allFriendsApplySlove()
+{
+    new_brief_wid->flushNewFriendIcon(false);
 }
 
 void FriendWidget::updateFriendsList(FrndInfoVectPtr frnd_infos)

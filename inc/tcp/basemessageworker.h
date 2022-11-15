@@ -14,6 +14,8 @@ using std::string;
 class TCPMessageHelper;
 
 //该类的子类用于处理同的消息类型(tcp_standard_message::MessageType)
+//对于TCPSenderWorker，只需要本基类即可完成所有功能需求
+//对于TCPReceiverWorker，需要派生不同的子类实现不同的功能
 class BaseMessageWorker: public QObject
 {
     Q_OBJECT

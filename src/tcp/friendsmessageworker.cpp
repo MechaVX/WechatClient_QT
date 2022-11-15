@@ -68,27 +68,12 @@ void FriendsMessageWorker::analizeMsgStru(QSharedPointer<TCPMessage> msg_stru)
     }
     else if (opt == tcp_standard_message::add_friend)
     {
-        qDebug() << msg_stru->data_buf;
-        //result[0]为本人账户(如果正确)，result[1]为申请人账户，其余为申请信息留言
+        //result[0]为申请留言信息
         auto result = this->splitDataBySpace(msg_stru->data_buf);
-        if (result.size() < 2)
-        {
-            qDebug() << "FriendsMessageWorker::analizeMsgStru:" << "result size error";
-        }
-        //仅用于测试
-        StackedWidget *stack_wnd = dynamic_cast<StackedWidget*>(getWidgetPointer(stack_widget));
-        if (result[0].toStdString() != stack_wnd->getAccount())
-        {
-            qDebug() << "FriendsMessageWorker::analizeMsgStru:" << "account not equal";
-        }
 
         QString apply_msg(msg_stru->data_buf);
-        //1234567890 1234567890 因而申请信息的开始index为22
-        //得到申请信息
-        apply_msg.remove(0, 22);
-        //得到申请信息
-        //apply_msg.remove(0, apply_msg.indexOf(' ') + 1);
-        emit friendApplication(result[1], apply_msg);
+
+        emit friendApplication(msg_stru->sender, apply_msg);
         emit friendApplication();
     }
     else if (opt == tcp_standard_message::agree_add_friend)
@@ -96,9 +81,8 @@ void FriendsMessageWorker::analizeMsgStru(QSharedPointer<TCPMessage> msg_stru)
         qDebug() << "agree add friend" << msg_stru->data_buf;
         StackedWidget *stack_wnd = dynamic_cast<StackedWidget*>(getWidgetPointer(stack_widget));
         //重新刷新好友列表
-        msg_stru = TCPMessage::createTCPMessage(tcp_standard_message::flush, flush_friends, { stack_wnd->getAccount() } );
+        msg_stru = TCPMessage::createTCPMessage(tcp_standard_message::flush, flush_friends, stack_wnd->getAccount());
         msg_helper->commitTCPMessage(msg_stru);
-
     }
     else if (opt == tcp_standard_message::send_message)
     {

@@ -41,7 +41,7 @@ void NewFriendWidget::init()
     //只能输入数字
     ui->lineEdit->setValidator(new QRegExpValidator(QRegExp("[0-9]+$")));
     //限定输入长度
-    ui->lineEdit->setMaxLength(11);
+    ui->lineEdit->setMaxLength(ACCOUNT_LEN);
 
     QObject::connect(ui->search_button, &QPushButton::clicked, this, &NewFriendWidget::searchUser);
 
@@ -67,22 +67,28 @@ using namespace tcp_standard_message;
 void NewFriendWidget::searchUser()
 {
     QString str = ui->lineEdit->text();
-    if (str.length() < 10)
+    if (str.length() < ACCOUNT_LEN)
         return;
-    if (stack_wnd->getAccount() == str.toStdString())
+    if (stack_wnd->getAccount() == str)
     {
         qDebug() << "转到自己的账号信息里";
         return;
     }
     FriendWidget *frnd_wnd = dynamic_cast<FriendWidget*>(getWidgetPointer(friend_widget));
     FriendBriefInfo frnd_info = frnd_wnd->getFriendBriefInfo(str);
+    //这是自己已有好友账号
     if (frnd_info)
     {
         FriendDetailWidget *frnd_det_wnd = dynamic_cast<FriendDetailWidget*>(getWidgetPointer(friend_detail_widget));
         frnd_det_wnd->showUserInformation(frnd_info);
         return;
     }
-    auto msg_stru = TCPMessage::createTCPMessage(friends, search_someone, {str.toStdString()});
+    auto msg_stru = TCPMessage::createTCPMessage(
+                    friends,
+                    search_someone,
+                    stack_wnd->getAccount(),
+                    TCPMessage::server_account,
+                    { str.toStdString() });
     msg_helper->commitTCPMessage(msg_stru);
 
 }
@@ -95,18 +101,38 @@ void NewFriendWidget::notSuchUser(const QString& account)
 void NewFriendWidget::newFriendApplyCome(const QString& account, const QString& apply_msg)
 {
     QListWidget *list_wnd = ui->listWidget;
-    QListWidgetItem *item = new QListWidgetItem(list_wnd);
-    NewFriendOptionWidget *opt_wnd = new NewFriendOptionWidget(this);
+    QListWidgetItem *item;
+    NewFriendOptionWidget *opt_wnd;
+    if (account_item_map.contains(account))
+    {
+        item = account_item_map[account];
+        opt_wnd = dynamic_cast<NewFriendOptionWidget*>(list_wnd->itemWidget(item));
+        opt_wnd->flushApplyMessage(apply_msg);
+        return;
+    }
+
+    item = new QListWidgetItem(list_wnd);
+    opt_wnd = new NewFriendOptionWidget(this);
     opt_wnd->init(account, account, apply_msg);
     item->setSizeHint(QSize(0, opt_wnd->size().height()));
     list_wnd->setItemWidget(item, opt_wnd);
     account_item_map.insert(account, item);
 }
 
+quint32 NewFriendWidget::getApplyAmount()
+{
+    return ui->listWidget->count();
+}
 
 void NewFriendWidget::removeFriendApply(const QString& account)
 {
     QListWidgetItem *item = account_item_map[account];
     ui->listWidget->removeItemWidget(item);
     delete item;
+    //所有好友申请已经处理完毕，将friendwidget好友申请图标更新
+    if (ui->listWidget->count() == 0)
+    {
+        FriendWidget *frnd_wnd = dynamic_cast<FriendWidget*>(getWidgetPointer(friend_widget));
+        frnd_wnd->allFriendsApplySlove();
+    }
 }

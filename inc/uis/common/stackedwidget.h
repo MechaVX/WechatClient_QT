@@ -27,7 +27,7 @@ public:
 
     void init();
     void startAll();
-    std::string getAccount();
+    QString getAccount();
 private:
     Ui::StackedWidget *ui;
     LoginWidget *login_widget;
@@ -39,7 +39,7 @@ private:
     FriendWidget *frd_wnd;
     TCPMessageHelper *msg_helper;
 
-    std::string account;
+    QString account;
     void userLogout(bool exit_progress = true);
     bool close_flag = false;
 protected:

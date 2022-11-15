@@ -38,7 +38,10 @@ void NewFriendBriefWidget::mousePressEvent(QMouseEvent *event)
     new_frnd_wnd->goAheadToThisWidget();
 }
 
-void NewFriendBriefWidget::newFriendApplyCome()
+void NewFriendBriefWidget::flushNewFriendIcon(bool has_new_friend)
 {
-    ui->img_lbl->setPixmap(new_frnd_img);
+    if (has_new_friend)
+        ui->img_lbl->setPixmap(new_frnd_img);
+    else
+        ui->img_lbl->setPixmap(no_new_frnd_img);
 }

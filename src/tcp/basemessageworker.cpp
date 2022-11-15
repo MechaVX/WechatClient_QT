@@ -34,8 +34,16 @@ QVector<QString> BaseMessageWorker::splitDataBySpace(const char *data_buf, int l
 string BaseMessageWorker::serializeMsgStruToString(const TCPMessage& msg_stru) const
 {
     string result;
+    result.reserve(sizeof(TCPMessage) + 5);
+    result += std::to_string(msg_stru.timestamp) + ' ';
     result += std::to_string(msg_stru.msg_typ) + ' ';
     result += std::to_string(msg_stru.msg_opt) + ' ';
+    for (char c: msg_stru.sender)
+        result.push_back(c);
+    result.push_back(' ');
+    for (char c: msg_stru.receiver)
+        result.push_back(c);
+    result.push_back(' ');
     result += std::to_string(msg_stru.data_len) + ' ';
     for (quint32 i = 0; i < msg_stru.data_len; ++i)
     {

@@ -24,7 +24,9 @@ signals:
                       const QString& label,
                       bool is_friend);
     void userInfoNoFound(const QString& account);
+    //这个信号是在NewFriendWidget新加好友申请信息的
     void friendApplication(const QString& account, const QString& apply_msg);
+    //这个信号是在friendwidget更新显示有好友申请的图标
     void friendApplication();
 private:
     QTcpSocket *tcp_socket;

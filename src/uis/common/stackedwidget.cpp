@@ -22,7 +22,7 @@ StackedWidget::StackedWidget(QWidget *parent) :
 
     login_widget = dynamic_cast<LoginWidget*>(main_widgets_managing::getWidgetPointer(main_widgets_managing::login_widget));
     this->account = login_widget->getAccount();
-    this->setWindowTitle(QString("Wechat") + account.data());
+    this->setWindowTitle(QString("Wechat") + account);
 
     this->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -55,10 +55,10 @@ void StackedWidget::startAll()
 {
     this->msg_helper = new TCPMessageHelper(this, login_widget->getTCPHelper());
     //获取新消息
-    auto msg_stru = TCPMessage::createTCPMessage(tcp_standard_message::flush, flush_message, { account });
+    auto msg_stru = TCPMessage::createTCPMessage(tcp_standard_message::flush, flush_message, account );
     msg_helper->commitTCPMessage(msg_stru);
     //获取朋友列表
-    msg_stru = TCPMessage::createTCPMessage(tcp_standard_message::flush, flush_friends, { account });
+    msg_stru = TCPMessage::createTCPMessage(tcp_standard_message::flush, flush_friends, account);
     msg_helper->commitTCPMessage(msg_stru);
 
 }
@@ -86,7 +86,7 @@ void StackedWidget::userLogout(bool exit_progress)
 {
     QTimer *timer = new QTimer(this);
     timer->start(500);
-    auto msg_stru = TCPMessage::createTCPMessage(setting, user_logout, { account });
+    auto msg_stru = TCPMessage::createTCPMessage(setting, user_logout, account);
     msg_helper->commitTCPMessage(msg_stru);
     QObject::connect(timer, &QTimer::timeout, [=]()
     {
@@ -118,7 +118,7 @@ void StackedWidget::switchWidget(BaseWidget *wnd)
 }
 
 
-std::string StackedWidget::getAccount()
+QString StackedWidget::getAccount()
 {
     return account;
 }

@@ -30,14 +30,14 @@ private:
     QThread *tcp_thread;
     TCPHelper *tcp_helper;
     //用于保存当前登录用户的账号
-    std::string user_account;
+    QString user_account;
     //登录成功后的界面
     StackedWidget *stack_wnd = nullptr;
 
     void setComponentsConnection();
-    bool isAccountFormatCorrect(const QString& str);
-    bool isPasswordFormatCorrect(const QString& str);
-    bool isPhoneFormatCorrect(const QString& str);
+    //bool isAccountFormatCorrect(const QString& str);
+    //bool isPasswordFormatCorrect(const QString& str);
+    //bool isPhoneFormatCorrect(const QString& str);
 
 public:
     LoginWidget(QWidget *parent = nullptr);
@@ -46,7 +46,7 @@ public:
     void init() override;
     void goAheadToThisWidget() override;
     TCPHelper* getTCPHelper();
-    std::string getAccount();
+    QString getAccount();
 protected:
     void paintEvent(QPaintEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
